@@ -28,8 +28,8 @@ const createReporter = (options_file) => {
     attention_color: chalk.gray
   };
 
-  console.log(util.inspect(options_file, {colors: true}));
-  console.log(util.inspect(defaults, {colors: true}));
+  // console.log(util.inspect(options_file, {colors: true}));
+  // console.log(util.inspect(defaults, {colors: true}));
 
   const process_options_file = (options_file) => {
     // get json options from file

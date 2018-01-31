@@ -59,8 +59,8 @@ var createReporter = function createReporter(options_file) {
     attention_color: _chalk2['default'].gray
   };
 
-  console.log(_util2['default'].inspect(options_file, { colors: true }));
-  console.log(_util2['default'].inspect(defaults, { colors: true }));
+  // console.log(util.inspect(options_file, {colors: true}));
+  // console.log(util.inspect(defaults, {colors: true}));
 
   var process_options_file = function process_options_file(options_file) {
     // get json options from file
