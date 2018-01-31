@@ -8,8 +8,8 @@ import prettyMs from 'pretty-ms';
 import jsondiffpatch from 'jsondiffpatch';
 
 const INDENT = '  '
-const FIG_TICK = '🍺 '
-const FIG_CROSS = '🔥 '
+const FIG_TICK = '👍 '
+const FIG_CROSS = '💩 '
 const DIFF_LENGTH = 7
 const success_color = chalk.blue
 const failure_color = chalk.yellow
