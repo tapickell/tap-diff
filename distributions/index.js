@@ -37,9 +37,15 @@ var _jsondiffpatch = require('jsondiffpatch');
 var _jsondiffpatch2 = _interopRequireDefault(_jsondiffpatch);
 
 var INDENT = '  ';
-var FIG_TICK = '🍺 ';
-var FIG_CROSS = '🔥 ';
+var FIG_TICK = '🤟 ';
+var FIG_CROSS = '💀 ';
 var DIFF_LENGTH = 7;
+var SUCCESS_COLOR = _chalk2['default'].blue;
+var FAILURE_COLOR = _chalk2['default'].red;
+var BRIGHT_COLOR = _chalk2['default'].white;
+var DIM_COLOR = _chalk2['default'].dim;
+var TITLE_COLOR = _chalk2['default'].black.bold;
+var ATTENTION_COLOR = _chalk2['default'].yellow;
 
 var createReporter = function createReporter() {
   var output = (0, _through22['default'])();
@@ -65,13 +71,13 @@ var createReporter = function createReporter() {
 
   var handleTest = function handleTest(name) {
     println();
-    println(_chalk2['default'].cyan(name), 1);
+    println(TITLE_COLOR(name), 1);
   };
 
   var handleAssertSuccess = function handleAssertSuccess(assert) {
     var name = assert.name;
 
-    println(_chalk2['default'].green(FIG_TICK) + '  ' + _chalk2['default'].green(name), 2);
+    println(SUCCESS_COLOR(FIG_TICK) + '  ' + SUCCESS_COLOR(name), 2);
   };
 
   var toString = function toString(arg) {
@@ -98,9 +104,9 @@ var createReporter = function createReporter() {
       var added = _ref.added;
       var removed = _ref.removed;
 
-      var style = _chalk2['default'].white;
-      if (added) style = _chalk2['default'].green.inverse;
-      if (removed) style = _chalk2['default'].red.inverse;
+      var style = BRIGHT_COLOR;
+      if (added) style = SUCCESS_COLOR.inverse;
+      if (removed) style = FAILURE_COLOR.inverse;
       return value.replace(/(^\s*)(.*)/g, function (m, one, two) {
         return one + style(two);
       });
@@ -133,7 +139,7 @@ var createReporter = function createReporter() {
       expected_type = toString(expected);
     }
 
-    println(_chalk2['default'].red(FIG_CROSS) + '  ' + _chalk2['default'].red(name) + ' at ' + _chalk2['default'].magenta(at), 2);
+    println(FAILURE_COLOR(FIG_CROSS) + '  ' + FAILURE_COLOR(name) + ' at ' + _chalk2['default'].black(at), 2);
 
     if (expected_type === 'object') {
       var delta = _jsondiffpatch2['default'].diff(actual[failed_test_number], expected[failed_test_number]);
@@ -152,7 +158,7 @@ var createReporter = function createReporter() {
       println(compared, 4);
       if (expected.length > DIFF_LENGTH) println(expected, 4);
     } else {
-      println(_chalk2['default'].red.inverse(actual) + _chalk2['default'].green.inverse(expected), 4);
+      println(FAILURE_COLOR.inverse(actual) + SUCCESS_COLOR.inverse(expected), 4);
     }
   };
 
@@ -160,13 +166,13 @@ var createReporter = function createReporter() {
     var finishedAt = Date.now();
 
     println();
-    println(_chalk2['default'].green(FIG_TICK + ' passed: ' + result.pass + '  ') + _chalk2['default'].red(FIG_CROSS + ' failed: ' + (result.fail || 0) + '  ') + _chalk2['default'].white('of ' + result.count + ' tests  ') + _chalk2['default'].dim('(' + (0, _prettyMs2['default'])(finishedAt - startedAt) + ')'));
+    println(SUCCESS_COLOR(FIG_TICK + ' passed: ' + result.pass + '  ') + FAILURE_COLOR(FIG_CROSS + ' failed: ' + (result.fail || 0) + '  ') + BRIGHT_COLOR('of ' + result.count + ' tests  ') + DIM_COLOR('(' + (0, _prettyMs2['default'])(finishedAt - startedAt) + ')'));
     println();
 
     if (result.ok) {
-      println(_chalk2['default'].green(FIG_TICK + ' All of ' + result.count + ' tests passed!'));
+      println(SUCCESS_COLOR(FIG_TICK + ' All of ' + result.count + ' tests passed!'));
     } else {
-      println(_chalk2['default'].red(FIG_CROSS + ' ' + (result.fail || 0) + ' of ' + result.count + ' tests failed.'));
+      println(FAILURE_COLOR(FIG_CROSS + ' ' + (result.fail || 0) + ' of ' + result.count + ' tests failed.'));
       stream.isFailed = true;
     }
 
@@ -187,7 +193,7 @@ var createReporter = function createReporter() {
   p.on('assert', function (assert) {
     if (assert.ok) return handleAssertSuccess(assert);
 
-    handleAssertFailure(assert);
+    return handleAssertFailure(assert);
   });
 
   p.on('complete', handleComplete);

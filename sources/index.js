@@ -8,15 +8,15 @@ import prettyMs from 'pretty-ms';
 import jsondiffpatch from 'jsondiffpatch';
 
 const INDENT = '  '
-const FIG_TICK = '👍 '
-const FIG_CROSS = '💩 '
+const FIG_TICK = '🤟 '
+const FIG_CROSS = '💀 '
 const DIFF_LENGTH = 7
-const success_color = chalk.blue
-const failure_color = chalk.yellow
-const bright_color = chalk.white
-const dim_color = chalk.dim
-const title_color = chalk.cyan
-const attention_color = chalk.orange
+const SUCCESS_COLOR = chalk.blue
+const FAILURE_COLOR = chalk.red
+const BRIGHT_COLOR = chalk.white
+const DIM_COLOR = chalk.dim
+const TITLE_COLOR = chalk.black.bold
+const ATTENTION_COLOR = chalk.yellow
 
 const createReporter = () => {
   const output = through2();
@@ -39,13 +39,13 @@ const createReporter = () => {
 
   const handleTest = name => {
     println();
-    println(title_color(name), 1);
+    println(TITLE_COLOR(name), 1);
   };
 
   const handleAssertSuccess = assert => {
     const name = assert.name;
 
-    println(`${success_color(FIG_TICK)}  ${success_color(name)}`, 2)
+    println(`${SUCCESS_COLOR(FIG_TICK)}  ${SUCCESS_COLOR(name)}`, 2)
   };
 
   const toString = (arg) => Object.prototype.toString.call(arg).slice(8, -1).toLowerCase()
@@ -62,9 +62,9 @@ const createReporter = () => {
     const name = assert.name;
 
     const writeDiff = ({ value, added, removed }) => {
-      let style = bright_color
-      if (added)   style = success_color.inverse
-      if (removed) style = failure_color.inverse
+      let style = BRIGHT_COLOR
+      if (added)   style = SUCCESS_COLOR.inverse
+      if (removed) style = FAILURE_COLOR.inverse
       return value.replace(/(^\s*)(.*)/g, (m, one, two) => one + style(two))
     };
 
@@ -96,7 +96,7 @@ const createReporter = () => {
       expected_type = toString(expected)
     }
 
-    println(`${failure_color(FIG_CROSS)}  ${failure_color(name)} at ${attention_color(at)}`, 2);
+    println(`${FAILURE_COLOR(FIG_CROSS)}  ${FAILURE_COLOR(name)} at ${chalk.black(at)}`, 2);
 
     if (expected_type === 'object') {
       const delta = jsondiffpatch.diff(actual[failed_test_number], expected[failed_test_number])
@@ -121,7 +121,7 @@ const createReporter = () => {
       if (expected.length > DIFF_LENGTH)println(expected, 4);
     } else {
       println(
-        failure_color.inverse(actual) + success_color.inverse(expected),
+        FAILURE_COLOR.inverse(actual) + SUCCESS_COLOR.inverse(expected),
         4
       );
     }
@@ -132,17 +132,17 @@ const createReporter = () => {
 
     println();
     println(
-      success_color(`${FIG_TICK} passed: ${result.pass}  `) +
-      failure_color(`${FIG_CROSS} failed: ${result.fail || 0}  `) +
-      bright_color(`of ${result.count} tests  `) +
-      dim_color(`(${prettyMs(finishedAt - startedAt)})`)
+      SUCCESS_COLOR(`${FIG_TICK} passed: ${result.pass}  `) +
+      FAILURE_COLOR(`${FIG_CROSS} failed: ${result.fail || 0}  `) +
+      BRIGHT_COLOR(`of ${result.count} tests  `) +
+      DIM_COLOR(`(${prettyMs(finishedAt - startedAt)})`)
     );
     println();
 
     if (result.ok) {
-      println(success_color(`${FIG_TICK} All of ${result.count} tests passed!`));
+      println(SUCCESS_COLOR(`${FIG_TICK} All of ${result.count} tests passed!`));
     } else {
-      println(failure_color(`${FIG_CROSS} ${result.fail || 0} of ${result.count} tests failed.`));
+      println(FAILURE_COLOR(`${FIG_CROSS} ${result.fail || 0} of ${result.count} tests failed.`));
       stream.isFailed = true;
     }
 
@@ -163,7 +163,7 @@ const createReporter = () => {
   p.on('assert', (assert) => {
     if (assert.ok) return handleAssertSuccess(assert);
 
-    handleAssertFailure(assert);
+    return handleAssertFailure(assert);
   });
 
   p.on('complete', handleComplete);
@@ -173,7 +173,7 @@ const createReporter = () => {
   });
 
   p.on('extra', extra => {
-    println(attention_color(`${extra}`.replace(/\n$/, '')), 4);
+    println(chalk.yellow(`${extra}`.replace(/\n$/, '')), 4);
   });
 
   return stream;
