@@ -16,7 +16,8 @@ const FAILURE_COLOR = chalk.red
 const BRIGHT_COLOR = chalk.white
 const DIM_COLOR = chalk.dim
 const TITLE_COLOR = chalk.black.bold
-const ATTENTION_COLOR = chalk.yellow
+const BOLD_COLOR = chalk.black.bold
+const ATTENTION_COLOR = chalk.gray
 
 const createReporter = () => {
   const output = through2();
@@ -134,7 +135,7 @@ const createReporter = () => {
     println(
       SUCCESS_COLOR(`${FIG_TICK} passed: ${result.pass}  `) +
       FAILURE_COLOR(`${FIG_CROSS} failed: ${result.fail || 0}  `) +
-      BRIGHT_COLOR(`of ${result.count} tests  `) +
+      BOLD_COLOR(`of ${result.count} tests  `) +
       DIM_COLOR(`(${prettyMs(finishedAt - startedAt)})`)
     );
     println();
@@ -173,7 +174,7 @@ const createReporter = () => {
   });
 
   p.on('extra', extra => {
-    println(chalk.yellow(`${extra}`.replace(/\n$/, '')), 4);
+    println(ATTENTION_COLOR(`${extra}`.replace(/\n$/, '')), 4);
   });
 
   return stream;

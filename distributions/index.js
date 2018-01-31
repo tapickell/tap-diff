@@ -45,7 +45,8 @@ var FAILURE_COLOR = _chalk2['default'].red;
 var BRIGHT_COLOR = _chalk2['default'].white;
 var DIM_COLOR = _chalk2['default'].dim;
 var TITLE_COLOR = _chalk2['default'].black.bold;
-var ATTENTION_COLOR = _chalk2['default'].yellow;
+var BOLD_COLOR = _chalk2['default'].black.bold;
+var ATTENTION_COLOR = _chalk2['default'].gray;
 
 var createReporter = function createReporter() {
   var output = (0, _through22['default'])();
@@ -166,7 +167,7 @@ var createReporter = function createReporter() {
     var finishedAt = Date.now();
 
     println();
-    println(SUCCESS_COLOR(FIG_TICK + ' passed: ' + result.pass + '  ') + FAILURE_COLOR(FIG_CROSS + ' failed: ' + (result.fail || 0) + '  ') + BRIGHT_COLOR('of ' + result.count + ' tests  ') + DIM_COLOR('(' + (0, _prettyMs2['default'])(finishedAt - startedAt) + ')'));
+    println(SUCCESS_COLOR(FIG_TICK + ' passed: ' + result.pass + '  ') + FAILURE_COLOR(FIG_CROSS + ' failed: ' + (result.fail || 0) + '  ') + BOLD_COLOR('of ' + result.count + ' tests  ') + DIM_COLOR('(' + (0, _prettyMs2['default'])(finishedAt - startedAt) + ')'));
     println();
 
     if (result.ok) {
@@ -203,7 +204,7 @@ var createReporter = function createReporter() {
   });
 
   p.on('extra', function (extra) {
-    println(_chalk2['default'].yellow(('' + extra).replace(/\n$/, '')), 4);
+    println(ATTENTION_COLOR(('' + extra).replace(/\n$/, '')), 4);
   });
 
   return stream;
