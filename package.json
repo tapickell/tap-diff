@@ -1,6 +1,6 @@
 {
   "name": "tap-emoji-diff",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "description": "My own version of a diff TAP reporter",
   "main": "./distributions/index.js",
   "bin": {
