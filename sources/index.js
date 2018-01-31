@@ -56,8 +56,8 @@ const createReporter = () => {
       // wrap keys without quote with valid double quote
       .replace(/([\$\w]+)\s*:/g, (_, $1) => '"'+$1+'":')
       // replacing single quote wrapped ones to double quote
-      .replace(/'([^']+)'/g, (_, $1) => '"' + $1 + '"')
-  }
+      .replace(/'([^']+)'/g, (_, $1) => '"' + $1 + '"');
+  };
 
   const handleAssertFailure = assert => {
     const name = assert.name;
@@ -73,7 +73,8 @@ const createReporter = () => {
       at,
       actual,
       expected
-    } = assert.diag
+    } = assert.diag;
+
 
     let expected_type = toString(expected)
 
