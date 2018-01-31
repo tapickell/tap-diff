@@ -2,7 +2,8 @@
 
 import createReporter from './index';
 
-const reporter = createReporter();
+let option = process.argv.slice(2)
+const reporter = createReporter(option);
 
 process.stdin
   .pipe(reporter)
