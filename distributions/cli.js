@@ -7,7 +7,8 @@ var _index = require('./index');
 
 var _index2 = _interopRequireDefault(_index);
 
-var reporter = (0, _index2['default'])();
+var option = process.argv.slice(2);
+var reporter = (0, _index2['default'])(option);
 
 process.stdin.pipe(reporter).pipe(process.stdout);
 

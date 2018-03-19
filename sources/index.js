@@ -6,23 +6,42 @@ import through2 from 'through2';
 import parser from 'tap-parser';
 import prettyMs from 'pretty-ms';
 import jsondiffpatch from 'jsondiffpatch';
+import util from 'util';
 
-const INDENT = '  '
-const FIG_TICK = '🍺 '
-const FIG_CROSS = '🔥 '
-const DIFF_LENGTH = 7
 
-const createReporter = () => {
+const createReporter = (options_file) => {
   const output = through2();
   const p = parser();
   const stream = duplexer(p, output);
   const startedAt = Date.now();
+  let defaults = {
+    indent: '  ',
+    diff_length: 7,
+    success_emoji: '🤟 ',
+    failure_emoji: '💀 ',
+    success_color: chalk.blue,
+    failure_color: chalk.red,
+    bright_color: chalk.white,
+    dim_color: chalk.dim,
+    title_color: chalk.black.bold,
+    bold_color: chalk.black.bold,
+    attention_color: chalk.gray
+  };
+
+  // console.log(util.inspect(options_file, {colors: true}));
+  // console.log(util.inspect(defaults, {colors: true}));
+
+  const process_options_file = (options_file) => {
+    // get json options from file
+    // update default options with json options
+    // try setting colors catch and set default
+  };
 
   const println = (input = '', indentLevel = 0) => {
     let indent = '';
 
     for (let i = 0; i < indentLevel; ++i) {
-      indent += INDENT;
+      indent += defaults.indent;
     }
 
     input.split('\n').forEach(line => {
@@ -33,13 +52,13 @@ const createReporter = () => {
 
   const handleTest = name => {
     println();
-    println(chalk.cyan(name), 1);
+    println(defaults.title_color(name), 1);
   };
 
   const handleAssertSuccess = assert => {
     const name = assert.name;
 
-    println(`${chalk.green(FIG_TICK)}  ${chalk.green(name)}`, 2)
+    println(`${defaults.success_color(defaults.success_emoji)}  ${defaults.success_color(name)}`, 2)
   };
 
   const toString = (arg) => Object.prototype.toString.call(arg).slice(8, -1).toLowerCase()
@@ -49,17 +68,16 @@ const createReporter = () => {
       // wrap keys without quote with valid double quote
       .replace(/([\$\w]+)\s*:/g, (_, $1) => '"'+$1+'":')
       // replacing single quote wrapped ones to double quote
-      .replace(/'([^']+)'/g, (_, $1) => '"' + $1 + '"')
-  }
+      .replace(/'([^']+)'/g, (_, $1) => '"' + $1 + '"');
+  };
 
   const handleAssertFailure = assert => {
     const name = assert.name;
 
-
     const writeDiff = ({ value, added, removed }) => {
-      let style = chalk.white
-      if (added)   style = chalk.green.inverse
-      if (removed) style = chalk.red.inverse
+      let style = defaults.bright_color
+      if (added)   style = defaults.success_color.inverse
+      if (removed) style = defaults.failure_color.inverse
       return value.replace(/(^\s*)(.*)/g, (m, one, two) => one + style(two))
     };
 
@@ -67,7 +85,8 @@ const createReporter = () => {
       at,
       actual,
       expected
-    } = assert.diag
+    } = assert.diag;
+
 
     let expected_type = toString(expected)
 
@@ -91,7 +110,7 @@ const createReporter = () => {
       expected_type = toString(expected)
     }
 
-    println(`${chalk.red(FIG_CROSS)}  ${chalk.red(name)} at ${chalk.magenta(at)}`, 2);
+    println(`${defaults.failure_color(defaults.failure_emoji)}  ${defaults.failure_color(name)} at ${chalk.black(at)}`, 2);
 
     if (expected_type === 'object') {
       const delta = jsondiffpatch.diff(actual[failed_test_number], expected[failed_test_number])
@@ -111,12 +130,12 @@ const createReporter = () => {
         .map(writeDiff)
         .join('');
 
-      if (actual.length > DIFF_LENGTH) println(actual, 4);
+      if (actual.length > defaults.diff_length) println(actual, 4);
       println(compared, 4);
-      if (expected.length > DIFF_LENGTH)println(expected, 4);
+      if (expected.length > defaults.diff_length)println(expected, 4);
     } else {
       println(
-        chalk.red.inverse(actual) + chalk.green.inverse(expected),
+        defaults.failure_color.inverse(actual) + defaults.success_color.inverse(expected),
         4
       );
     }
@@ -127,17 +146,17 @@ const createReporter = () => {
 
     println();
     println(
-      chalk.green(`${FIG_TICK} passed: ${result.pass}  `) +
-      chalk.red(`${FIG_CROSS} failed: ${result.fail || 0}  `) +
-      chalk.white(`of ${result.count} tests  `) +
-      chalk.dim(`(${prettyMs(finishedAt - startedAt)})`)
+      defaults.success_color(`${defaults.success_emoji} passed: ${result.pass}  `) +
+      defaults.failure_color(`${defaults.failure_emoji} failed: ${result.fail || 0}  `) +
+      defaults.bold_color(`of ${result.count} tests  `) +
+      defaults.dim_color(`(${prettyMs(finishedAt - startedAt)})`)
     );
     println();
 
     if (result.ok) {
-      println(chalk.green(`${FIG_TICK} All of ${result.count} tests passed!`));
+      println(defaults.success_color(`${defaults.success_emoji} All of ${result.count} tests passed!`));
     } else {
-      println(chalk.red(`${FIG_CROSS} ${result.fail || 0} of ${result.count} tests failed.`));
+      println(defaults.failure_color(`${defaults.failure_emoji} ${result.fail || 0} of ${result.count} tests failed.`));
       stream.isFailed = true;
     }
 
@@ -158,7 +177,7 @@ const createReporter = () => {
   p.on('assert', (assert) => {
     if (assert.ok) return handleAssertSuccess(assert);
 
-    handleAssertFailure(assert);
+    return handleAssertFailure(assert);
   });
 
   p.on('complete', handleComplete);
@@ -168,7 +187,7 @@ const createReporter = () => {
   });
 
   p.on('extra', extra => {
-    println(chalk.yellow(`${extra}`.replace(/\n$/, '')), 4);
+    println(defaults.attention_color(`${extra}`.replace(/\n$/, '')), 4);
   });
 
   return stream;

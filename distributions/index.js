@@ -36,16 +36,37 @@ var _jsondiffpatch = require('jsondiffpatch');
 
 var _jsondiffpatch2 = _interopRequireDefault(_jsondiffpatch);
 
-var INDENT = '  ';
-var FIG_TICK = '🍺 ';
-var FIG_CROSS = '🔥 ';
-var DIFF_LENGTH = 7;
+var _util = require('util');
 
-var createReporter = function createReporter() {
+var _util2 = _interopRequireDefault(_util);
+
+var createReporter = function createReporter(options_file) {
   var output = (0, _through22['default'])();
   var p = (0, _tapParser2['default'])();
   var stream = (0, _duplexer2['default'])(p, output);
   var startedAt = Date.now();
+  var defaults = {
+    indent: '  ',
+    diff_length: 7,
+    success_emoji: '🤟 ',
+    failure_emoji: '💀 ',
+    success_color: _chalk2['default'].blue,
+    failure_color: _chalk2['default'].red,
+    bright_color: _chalk2['default'].white,
+    dim_color: _chalk2['default'].dim,
+    title_color: _chalk2['default'].black.bold,
+    bold_color: _chalk2['default'].black.bold,
+    attention_color: _chalk2['default'].gray
+  };
+
+  // console.log(util.inspect(options_file, {colors: true}));
+  // console.log(util.inspect(defaults, {colors: true}));
+
+  var process_options_file = function process_options_file(options_file) {
+    // get json options from file
+    // update default options with json options
+    // try setting colors catch and set default
+  };
 
   var println = function println() {
     var input = arguments.length <= 0 || arguments[0] === undefined ? '' : arguments[0];
@@ -54,7 +75,7 @@ var createReporter = function createReporter() {
     var indent = '';
 
     for (var i = 0; i < indentLevel; ++i) {
-      indent += INDENT;
+      indent += defaults.indent;
     }
 
     input.split('\n').forEach(function (line) {
@@ -65,13 +86,13 @@ var createReporter = function createReporter() {
 
   var handleTest = function handleTest(name) {
     println();
-    println(_chalk2['default'].cyan(name), 1);
+    println(defaults.title_color(name), 1);
   };
 
   var handleAssertSuccess = function handleAssertSuccess(assert) {
     var name = assert.name;
 
-    println(_chalk2['default'].green(FIG_TICK) + '  ' + _chalk2['default'].green(name), 2);
+    println(defaults.success_color(defaults.success_emoji) + '  ' + defaults.success_color(name), 2);
   };
 
   var toString = function toString(arg) {
@@ -98,9 +119,9 @@ var createReporter = function createReporter() {
       var added = _ref.added;
       var removed = _ref.removed;
 
-      var style = _chalk2['default'].white;
-      if (added) style = _chalk2['default'].green.inverse;
-      if (removed) style = _chalk2['default'].red.inverse;
+      var style = defaults.bright_color;
+      if (added) style = defaults.success_color.inverse;
+      if (removed) style = defaults.failure_color.inverse;
       return value.replace(/(^\s*)(.*)/g, function (m, one, two) {
         return one + style(two);
       });
@@ -133,7 +154,7 @@ var createReporter = function createReporter() {
       expected_type = toString(expected);
     }
 
-    println(_chalk2['default'].red(FIG_CROSS) + '  ' + _chalk2['default'].red(name) + ' at ' + _chalk2['default'].magenta(at), 2);
+    println(defaults.failure_color(defaults.failure_emoji) + '  ' + defaults.failure_color(name) + ' at ' + _chalk2['default'].black(at), 2);
 
     if (expected_type === 'object') {
       var delta = _jsondiffpatch2['default'].diff(actual[failed_test_number], expected[failed_test_number]);
@@ -148,11 +169,11 @@ var createReporter = function createReporter() {
     } else if (expected_type === 'string') {
       var compared = (0, _diff.diffWordsWithSpace)(actual, expected).map(writeDiff).join('');
 
-      if (actual.length > DIFF_LENGTH) println(actual, 4);
+      if (actual.length > defaults.diff_length) println(actual, 4);
       println(compared, 4);
-      if (expected.length > DIFF_LENGTH) println(expected, 4);
+      if (expected.length > defaults.diff_length) println(expected, 4);
     } else {
-      println(_chalk2['default'].red.inverse(actual) + _chalk2['default'].green.inverse(expected), 4);
+      println(defaults.failure_color.inverse(actual) + defaults.success_color.inverse(expected), 4);
     }
   };
 
@@ -160,13 +181,13 @@ var createReporter = function createReporter() {
     var finishedAt = Date.now();
 
     println();
-    println(_chalk2['default'].green(FIG_TICK + ' passed: ' + result.pass + '  ') + _chalk2['default'].red(FIG_CROSS + ' failed: ' + (result.fail || 0) + '  ') + _chalk2['default'].white('of ' + result.count + ' tests  ') + _chalk2['default'].dim('(' + (0, _prettyMs2['default'])(finishedAt - startedAt) + ')'));
+    println(defaults.success_color(defaults.success_emoji + ' passed: ' + result.pass + '  ') + defaults.failure_color(defaults.failure_emoji + ' failed: ' + (result.fail || 0) + '  ') + defaults.bold_color('of ' + result.count + ' tests  ') + defaults.dim_color('(' + (0, _prettyMs2['default'])(finishedAt - startedAt) + ')'));
     println();
 
     if (result.ok) {
-      println(_chalk2['default'].green(FIG_TICK + ' All of ' + result.count + ' tests passed!'));
+      println(defaults.success_color(defaults.success_emoji + ' All of ' + result.count + ' tests passed!'));
     } else {
-      println(_chalk2['default'].red(FIG_CROSS + ' ' + (result.fail || 0) + ' of ' + result.count + ' tests failed.'));
+      println(defaults.failure_color(defaults.failure_emoji + ' ' + (result.fail || 0) + ' of ' + result.count + ' tests failed.'));
       stream.isFailed = true;
     }
 
@@ -187,7 +208,7 @@ var createReporter = function createReporter() {
   p.on('assert', function (assert) {
     if (assert.ok) return handleAssertSuccess(assert);
 
-    handleAssertFailure(assert);
+    return handleAssertFailure(assert);
   });
 
   p.on('complete', handleComplete);
@@ -197,7 +218,7 @@ var createReporter = function createReporter() {
   });
 
   p.on('extra', function (extra) {
-    println(_chalk2['default'].yellow(('' + extra).replace(/\n$/, '')), 4);
+    println(defaults.attention_color(('' + extra).replace(/\n$/, '')), 4);
   });
 
   return stream;
